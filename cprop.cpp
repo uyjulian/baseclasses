@@ -118,7 +118,7 @@ STDMETHODIMP CBasePropertyPage::GetPageInfo(__out LPPROPPAGEINFO pPageInfo)
     pPageInfo->size.cx          = 340;
     pPageInfo->size.cy          = 150;
 
-    GetDialogSize(m_DialogId, DialogProc,0L,&pPageInfo->size);
+    GetDialogSize(m_DialogId, (DLGPROC)DialogProc,0L,&pPageInfo->size);
     return NOERROR;
 }
 
@@ -203,7 +203,7 @@ STDMETHODIMP CBasePropertyPage::Activate(HWND hwndParent,
     m_hwnd = CreateDialogParam(g_hInst,
                                MAKEINTRESOURCE(m_DialogId),
                                hwndParent,
-                               DialogProc,
+                               (DLGPROC)DialogProc,
                                (LPARAM) this);
     if (m_hwnd == NULL) {
         return E_OUTOFMEMORY;
