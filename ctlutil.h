@@ -308,6 +308,10 @@ public:
     CPosPassThru(__in_opt LPCTSTR, __in_opt LPUNKNOWN, __inout HRESULT*, IPin *);
     DECLARE_IUNKNOWN
 
+#ifndef _MSC_VER
+    virtual ~CPosPassThru();
+#endif
+
     HRESULT ForceRefresh() {
         return S_OK;
     };
@@ -376,6 +380,9 @@ public:
     // Used to help with passing media times through graph
 
     CRendererPosPassThru(__in_opt LPCTSTR, __in_opt LPUNKNOWN, __inout HRESULT*, IPin *);
+#ifndef _MSC_VER
+    virtual ~CRendererPosPassThru();
+#endif
     HRESULT RegisterMediaTime(IMediaSample *pMediaSample);
     HRESULT RegisterMediaTime(LONGLONG StartTime,LONGLONG EndTime);
     HRESULT GetMediaTime(__out LONGLONG *pStartTime,__out_opt LONGLONG *pEndTime);

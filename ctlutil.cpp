@@ -492,6 +492,11 @@ CPosPassThru::CPosPassThru(__in_opt LPCTSTR pName,
     }
 }
 
+#ifndef _MSC_VER
+CPosPassThru::~CPosPassThru()
+{
+}
+#endif
 
 // Expose our IMediaSeeking and IMediaPosition interfaces
 
@@ -991,6 +996,11 @@ CRendererPosPassThru::CRendererPosPassThru(__in_opt LPCTSTR pName,
 {
 }
 
+#ifndef _MSC_VER
+CRendererPosPassThru::~CRendererPosPassThru()
+{
+}
+#endif
 
 // Sets the media times the object should report
 
