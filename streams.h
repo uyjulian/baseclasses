@@ -23,6 +23,137 @@
 #else
 #define AM_NOVTABLE
 #endif
+#else
+/* As mingw-w64 is currently missing some definitions, we will define them here instead. */
+
+#include <chrono>
+#include <limits>
+#include <utility>
+#include <vector>
+#include <windows.h>
+#include <tchar.h>
+#include <strsafe.h>
+#include <control.h>
+#include <dshow.h>
+#include <dmodshow.h>
+#include <strmif.h>
+#include <specstrings.h>
+#include <vfw.h>
+#include <vfwmsgs.h>
+#include <nserror.h>
+#include <intsafe.h>
+#define __in
+#define __out
+#define __deref_in
+#define __deref_out
+#define __deref_inout_opt
+#define __field_ecount_opt(size)
+#define __in_bcount_opt(size)
+#define __in_ecount_opt(size)
+#define __control_entrypoint(category)
+#define __success(expr)
+#define __deref_out_range(lb,ub)
+#define __out_range(lb,ub)
+#define __AMVIDEO__
+enum
+{
+    WM_SFEX_NOTASYNCPOINT = 0x2,
+    WM_SFEX_DATALOSS = 0x4,
+};
+#define min(a,b) (((a)<(b))?(a):(b))
+#define max(a,b) (((a)>(b))?(a):(b))
+
+#define SIZE_EGA_PALETTE (iEGA_COLORS * sizeof(RGBQUAD))
+#define SIZE_PALETTE (iPALETTE_COLORS * sizeof(RGBQUAD))
+#define SIZE_MASKS (iMASK_COLORS * sizeof(DWORD))
+#define SIZE_PREHEADER (FIELD_OFFSET(VIDEOINFOHEADER,bmiHeader))
+#define SIZE_VIDEOHEADER (sizeof(BITMAPINFOHEADER) + SIZE_PREHEADER)
+
+#define WIDTHBYTES(bits) ((DWORD)(((bits)+31) & (~31)) / 8)
+#define DIBWIDTHBYTES(bi) (DWORD)WIDTHBYTES((DWORD)(bi).biWidth * (DWORD)(bi).biBitCount)
+#define _DIBSIZE(bi) (DIBWIDTHBYTES(bi) * (DWORD)(bi).biHeight)
+#define DIBSIZE(bi) ((bi).biHeight < 0 ? (-1)*(_DIBSIZE(bi)) : _DIBSIZE(bi))
+
+#define WIDTHBYTES_RAW(bits) ((DWORD) ((bits) + 7) / 8)
+#define RAWWIDTHBYTES(bi) (DWORD)WIDTHBYTES_RAW((DWORD)(bi).biWidth * (DWORD)(bi).biBitCount)
+#define _RAWSIZE(bi) (RAWWIDTHBYTES(bi) * (DWORD)(bi).biHeight)
+#define RAWSIZE(bi) ((bi).biHeight < 0 ? (-1)*(_RAWSIZE(bi)) : _RAWSIZE(bi))
+
+__inline HRESULT SAFE_DIBWIDTHBYTES(_In_ const BITMAPINFOHEADER *pbi, _Out_ DWORD *pcbWidth)
+{
+    DWORD dw;
+    HRESULT hr;
+    if (pbi->biWidth < 0 || pbi->biBitCount <= 0) {
+        return E_INVALIDARG;
+    }
+    //  Calculate width in bits
+    hr = DWordMult((DWORD)pbi->biWidth, (DWORD)pbi->biBitCount, &dw);
+    if (FAILED(hr)) {
+        return hr;
+    }
+    //  Round up to bytes
+    dw = (dw & 7) ? dw / 8 + 1: dw / 8;
+
+    //  Round up to a multiple of 4 bytes
+    if (dw & 3) {
+        dw += 4 - (dw & 3);
+    }
+
+    *pcbWidth = dw;
+    return S_OK;
+}
+
+__inline HRESULT SAFE_DIBSIZE(_In_ const BITMAPINFOHEADER *pbi, _Out_ DWORD *pcbSize)
+{
+    DWORD dw;
+    DWORD dwWidthBytes;
+    HRESULT hr;
+    if (pbi->biHeight == 0x80000000) {
+        return E_INVALIDARG;
+    }
+    hr = SAFE_DIBWIDTHBYTES(pbi, &dwWidthBytes);
+    if (FAILED(hr)) {
+        return hr;
+    }
+    dw = abs(pbi->biHeight);
+    hr = DWordMult(dw, dwWidthBytes, &dw);
+    if (FAILED(hr)) {
+        return hr;
+    }
+    *pcbSize = dw;
+    return S_OK;
+}
+
+#define TRUECOLOR(pbmi)  ((TRUECOLORINFO *)(((LPBYTE)&((pbmi)->bmiHeader)) \
+          + (pbmi)->bmiHeader.biSize))
+#define COLORS(pbmi)  ((RGBQUAD *)(((LPBYTE)&((pbmi)->bmiHeader))   \
+          + (pbmi)->bmiHeader.biSize))
+#define BITMASKS(pbmi)  ((DWORD *)(((LPBYTE)&((pbmi)->bmiHeader))   \
+          + (pbmi)->bmiHeader.biSize))
+
+#define BIT_MASKS_MATCH(pbmi1,pbmi2)                                \
+    (((pbmi1)->dwBitMasks[iRED] == (pbmi2)->dwBitMasks[iRED]) &&        \
+     ((pbmi1)->dwBitMasks[iGREEN] == (pbmi2)->dwBitMasks[iGREEN]) &&    \
+     ((pbmi1)->dwBitMasks[iBLUE] == (pbmi2)->dwBitMasks[iBLUE]))
+
+#define RESET_MASKS(pbmi) (ZeroMemory((PVOID)(pbmi)->dwBitFields,SIZE_MASKS))
+#define RESET_HEADER(pbmi) (ZeroMemory((PVOID)(pbmi),SIZE_VIDEOHEADER))
+#define RESET_PALETTE(pbmi) (ZeroMemory((PVOID)(pbmi)->bmiColors,SIZE_PALETTE));
+
+#define PALETTISED(pbmi) ((pbmi)->bmiHeader.biBitCount <= iPALETTE)
+#define PALETTE_ENTRIES(pbmi) ((DWORD) 1 << (pbmi)->bmiHeader.biBitCount)
+
+#define HEADER(pVideoInfo) (&(((VIDEOINFOHEADER *) (pVideoInfo))->bmiHeader))
+
+#define WMMEDIASUBTYPE_WMAudioV2 WMMEDIASUBTYPE_WMAudioV9
+#define WMMEDIASUBTYPE_WMAudioV7 WMMEDIASUBTYPE_WMAudioV9
+#define WMMEDIASUBTYPE_WMAudioV8 WMMEDIASUBTYPE_WMAudioV9
+
+#define g_wszWMDuration L"Duration"
+#define g_wszWMNumberOfFrames L"NumberOfFrames"
+#define g_wszWMVideoWidth L"WM/VideoWidth"
+#define g_wszWMVideoHeight L"WM/VideoHeight"
+#define g_wszWMVideoFrameRate L"WM/VideoFrameRate"
 #endif	// MSC_VER
 
 
