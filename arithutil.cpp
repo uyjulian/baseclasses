@@ -18,6 +18,8 @@
 //
 
 #ifndef _X86_
+#endif
+#if !defined(_MSC_VER) || !defined(_X86_)
 
 #define LLtoU64(x) (*(unsigned __int64*)(void*)(&(x)))
 
