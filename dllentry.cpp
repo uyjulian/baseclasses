@@ -25,6 +25,11 @@
 extern CFactoryTemplate g_Templates[];
 extern int g_cTemplates;
 
+#ifndef _MSC_VER
+CFactoryTemplate g_Templates[] = { { L"", NULL, NULL, NULL, NULL} };
+int g_cTemplates = sizeof(g_Templates) / sizeof(g_Templates[0]);
+#endif
+
 HINSTANCE g_hInst;
 DWORD	  g_amPlatform;		// VER_PLATFORM_WIN32_WINDOWS etc... (from GetVersionEx)
 OSVERSIONINFO g_osInfo;
@@ -261,7 +266,9 @@ DllCanUnloadNow()
 // --- standard WIN32 entrypoints --------------------------------------
 
 
+#ifdef _MSC_VER
 extern "C" void __cdecl __security_init_cookie(void);
+#endif
 extern "C" BOOL WINAPI _DllEntryPoint(HINSTANCE, ULONG, __inout_opt LPVOID);
 #pragma comment(linker, "/merge:.CRT=.rdata")
 
@@ -277,7 +284,9 @@ DllEntryPoint(
 {
     if ( ulReason == DLL_PROCESS_ATTACH ) {
         // Must happen before any other code is executed.  Thankfully - it's re-entrant
+#ifdef _MSC_VER
         __security_init_cookie();
+#endif
     }
     return _DllEntryPoint(hInstance, ulReason, pv);
 }
