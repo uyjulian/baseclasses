@@ -1230,6 +1230,7 @@ CDisp::CDisp(IUnknown *pUnk)
         return;
     }
 
+#ifdef _MSC_VER
     IPin *pp;
     hr = pUnk->QueryInterface(IID_IPin, (void **)&pp);
     if(SUCCEEDED(hr))
@@ -1238,6 +1239,7 @@ CDisp::CDisp(IUnknown *pUnk)
         pp->Release();
         return;
     }
+#endif
 }
 
 
