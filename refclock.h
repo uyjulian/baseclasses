@@ -177,7 +177,11 @@ private:
 protected:
     CAMSchedule * m_pSchedule;
 
+#ifdef _MSC_VER
     void Restart (IN REFERENCE_TIME rtMinTime = 0I64) ;
+#else
+    void Restart (IN REFERENCE_TIME rtMinTime = 0) ;
+#endif
 };
 
 #endif
